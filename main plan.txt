@@ -1,0 +1,70 @@
+This is a self-help app. You have to design the backend and frontend . In the backend you have to make the instruction. Follow the instruction.md file. 
+
+first i will provide u with the logics we us in the web.
+
+
+first, the user will land to the homepage then follow the flowchart.
+
+in the disablity there must be two options wither resgister or login. There will be three options, deaf blind or handicapped.
+
+
+
+in the deaf section it should show volunteers nearby (check the flowchrt)
+
+in the blind section, for accessibility it should have voice modultion that will help the blind person to use the web.(same fuctions like deaf.)
+
+handicapped - volunteers needed (check flowchart)
+
+
+follow flowchart for both other elederly and women saftey 
+
+
+main - 
+
+
+
+in the volunteers profile section
+should be volunteer profile and the skills they have , location , rating. and these- 
+
+resgister - 
+
+Full name
+
+Profile photo (optional)
+
+Email address
+
+Mobile number
+
+City or area
+
+Age or age group, if relevant
+
+Skills and interests
+
+Availability (days and hours)
+
+Preferred volunteering categories
+
+
+ login  deatails - 
+
+ take it by your own 
+
+ kindness score logics - here after completing the task, the volunteer will recive the kindness points in which 
+ 30% for admin(company), 70% for volunteer.
+
+ admin dashboard - 
+ for list of volunteer, give al the deatails of all the volunteers inlcuing everything and kindness scores.
+
+
+
+addition of dark and light mode. (mandatory)
+
+
+
+
+
+
+
+
