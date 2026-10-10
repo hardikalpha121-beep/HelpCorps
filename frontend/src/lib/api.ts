@@ -1,13 +1,32 @@
 import axios from 'axios';
 
+let workingBaseUrl = '';
+
 export function getBaseUrl() {
+  if (workingBaseUrl) return workingBaseUrl;
+
+  const envUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   if (typeof window !== 'undefined') {
-    const host = window.location.hostname;
-    if (host && host !== 'localhost' && host !== '127.0.0.1') {
-      return `http://${host}:5004`;
+    const cached = sessionStorage.getItem('helpcorps_api_url');
+    if (cached) {
+      workingBaseUrl = cached;
+      return cached;
     }
+    const host = window.location.hostname || 'localhost';
+    // If NEXT_PUBLIC_API_BASE_URL is set, prioritize it
+    if (envUrl) {
+      return envUrl;
+    }
+    return `http://${host}:5008`;
   }
-  return process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:5004';
+  return envUrl ?? 'http://localhost:5008';
+}
+
+export function setWorkingBaseUrl(url: string) {
+  workingBaseUrl = url;
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('helpcorps_api_url', url);
+  }
 }
 
 export const api = axios.create({
@@ -28,12 +47,44 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ── Auto-refresh on 401 ──────────────────────────────────────────────────
+// ── Auto-refresh on 401 & Auto-port fallback (5008 <-> 5004) on network failure ─
 let refreshing = false;
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    // If request succeeded, lock in the working URL
+    if (res.config.baseURL && res.config.baseURL !== workingBaseUrl) {
+      setWorkingBaseUrl(res.config.baseURL);
+    }
+    return res;
+  },
   async (error) => {
     const original = error.config;
+
+    // 1. Port fallback if server is running on 5004 instead of 5008 or vice-versa
+    if (!error.response && original && !original._portRetried) {
+      original._portRetried = true;
+      const current = original.baseURL || getBaseUrl();
+      let alternate = '';
+      if (current.includes(':5008')) {
+        alternate = current.replace(':5008', ':5004');
+      } else if (current.includes(':5004')) {
+        alternate = current.replace(':5004', ':5008');
+      }
+
+      if (alternate) {
+        try {
+          original.baseURL = alternate;
+          const retryRes = await axios(original);
+          setWorkingBaseUrl(alternate);
+          api.defaults.baseURL = alternate;
+          return retryRes;
+        } catch {
+          // Both failed, proceed to error rejection
+        }
+      }
+    }
+
+    // 2. Token refresh on 401
     if (error.response?.status === 401 && !original._retry && !refreshing) {
       original._retry = true;
       refreshing = true;

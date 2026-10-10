@@ -187,7 +187,9 @@ export default function AuthPage() {
                   (loginMutation.error as any)?.response?.data?.message ??
                   (registerMutation.error as any)?.response?.data?.error?.message ??
                   (registerMutation.error as any)?.response?.data?.message ??
-                  "Authentication failed. Please check your details."}
+                  (!(loginMutation.error as any)?.response && !(registerMutation.error as any)?.response
+                    ? "Cannot reach backend server. Please ensure the backend is running on port 5008 or 5004."
+                    : "Authentication failed. Please check your email and password.")}
               </span>
             </div>
           )}
